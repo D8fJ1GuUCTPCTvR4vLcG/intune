@@ -480,15 +480,15 @@ If (Test-Path $Search) {
 
 
 #Default empty Start Menu Layout
-Write-Host "Empty default start menu (start2.bin)"
-Invoke-WebRequest -uri "https://github.com/D8fJ1GuUCTPCTvR4vLcG/intune/raw/main/debloat/start2.bin" -outfile "C:\Windows\Temp\start2.bin"
-$startmenuTemplate = "C:\Windows\Temp\start2.bin"
-$defaultProfile = "C:\Users\default\AppData\Local\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\LocalState"
-If (!(Test-Path $defaultProfile)) {
-	New-Item $defaultProfile
-}
-Copy-Item -Path $startmenuTemplate -Destination $defaultProfile -Force
-Remove-Item $startmenuTemplate -Recurse
+#Write-Host "Empty default start menu (start2.bin)"
+#Invoke-WebRequest -uri "https://github.com/D8fJ1GuUCTPCTvR4vLcG/intune/raw/main/debloat/start2.bin" -outfile "C:\Windows\Temp\start2.bin"
+#$startmenuTemplate = "C:\Windows\Temp\start2.bin"
+#$defaultProfile = "C:\Users\default\AppData\Local\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\LocalState"
+#If (!(Test-Path $defaultProfile)) {
+#	New-Item $defaultProfile
+#}
+#Copy-Item -Path $startmenuTemplate -Destination $defaultProfile -Force
+#Remove-Item $startmenuTemplate -Recurse
 
 
 
