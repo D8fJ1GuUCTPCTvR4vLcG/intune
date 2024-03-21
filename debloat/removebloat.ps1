@@ -1,96 +1,18 @@
 <#
-.SYNOPSIS
-.Removes bloat from a fresh Windows build
-.DESCRIPTION
-.Removes AppX Packages
-.Disables Cortana
-.Removes McAfee
-.Removes HP Bloat
-.Removes Dell Bloat
-.Removes Lenovo Bloat
-.Windows 10 and Windows 11 Compatible
-.Removes any unwanted installed applications
-.Removes unwanted services and tasks
-.Removes Edge Surf Game
-
-.INPUTS
-.OUTPUTS
-C:\ProgramData\Debloat\Debloat.log
 .NOTES
-  Version:        4.2.6
+  Version:        4.2.9
   Author:         Andrew Taylor
   Twitter:        @AndrewTaylor_2
   WWW:            andrewstaylor.com
   Creation Date:  08/03/2022
-  Purpose/Change: Initial script development
-  Change 12/08/2022 - Added additional HP applications
-  Change 23/09/2022 - Added Clipchamp (new in W11 22H2)
-  Change 28/10/2022 - Fixed issue with Dell apps
-  Change 23/11/2022 - Added Teams Machine wide to exceptions
-  Change 27/11/2022 - Added Dell apps
-  Change 07/12/2022 - Whitelisted Dell Audio and Firmware
-  Change 19/12/2022 - Added Windows 11 start menu support
-  Change 20/12/2022 - Removed Gaming Menu from Settings
-  Change 18/01/2023 - Fixed Scheduled task error and cleared up $null posistioning
-  Change 22/01/2023 - Re-enabled Telemetry for Endpoint Analytics
-  Change 30/01/2023 - Added Microsoft Family to removal list
-  Change 31/01/2023 - Fixed Dell loop
-  Change 08/02/2023 - Fixed HP apps (thanks to http://gerryhampsoncm.blogspot.com/2023/02/remove-pre-installed-hp-software-during.html?m=1)
-  Change 08/02/2023 - Removed reg keys for Teams Chat
-  Change 14/02/2023 - Added HP Sure Apps
-  Change 07/03/2023 - Enabled Location tracking (with commenting to disable)
-  Change 08/03/2023 - Teams chat fix
-  Change 10/03/2023 - Dell array fix
-  Change 19/04/2023 - Added loop through all users for HKCU keys for post-OOBE deployments
-  Change 29/04/2023 - Removes News Feed
-  Change 26/05/2023 - Added Set-Acl
-  Change 26/05/2023 - Added multi-language support for Set-Acl commands
-  Change 30/05/2023 - Logic to check if gamepresencewriter exists before running Set-Acl to stop errors on re-run
-  Change 25/07/2023 - Added Lenovo apps (Thanks to Simon Lilly and Philip Jorgensen)
-  Change 31/07/2023 - Added LenovoAssist
-  Change 21/09/2023 - Remove Windows backup for Win10
-  Change 28/09/2023 - Enabled Diagnostic Tracking for Endpoint Analytics
-  Change 02/10/2023 - Lenovo Fix
-  Change 06/10/2023 - Teams chat fix
-  Change 09/10/2023 - Dell Command Update change
-  Change 11/10/2023 - Grab all uninstall strings and use native uninstaller instead of uninstall-package
-  Change 14/10/2023 - Updated HP Audio package name
-  Change 31/10/2023 - Added PowerAutomateDesktop and update Microsoft.Todos
-  Change 01/11/2023 - Added fix for Windows backup removing Shell Components
-  Change 06/11/2023 - Removes Windows CoPilot
-  Change 07/11/2023 - HKU fix
-  Change 13/11/2023 - Added CoPilot removal to .Default Users
-  Change 14/11/2023 - Added logic to stop errors on HP machines without HP docs installed
-  Change 14/11/2023 - Added logic to stop errors on Lenovo machines without some installers
-  Change 15/11/2023 - Code Signed for additional security
-  Change 02/12/2023 - Added extra logic before app uninstall to check if a user has logged in
-  Change 04/01/2024 - Added Dropbox and DevHome to AppX removal
-  Change 05/01/2024 - Added MSTSC to whitelist
-  Change 25/01/2024 - Added logic for LenovoNow/LenovoWelcome
-  Change 25/01/2024 - Updated Dell app list (thanks Hrvoje in comments)
-  Change 29/01/2024 - Changed /I to /X in Dell command
-  Change 30/01/2024 - Fix Lenovo Vantage version
-  Change 31/01/2024 - McAfee fix and Dell changes
-  Change 01/02/2024 - Dell fix
-  Change 01/02/2024 - Added logic around appxremoval to stop failures in logging
-  Change 05/02/2024 - Added whitelist parameters
-  Change 16/02/2024 - Added wildcard to dropbox
-  Change 23/02/2024 - Added Lenovo SmartMeetings
-  Change 06/03/2024 - Added Lenovo View and Vantage
-  Change 08/03/2024 - Added Lenovo Smart Noise Cancellation
-  Change 13/03/2024 - Added updated McAfee
-N/A
-
-https://github.com/andrew-s-taylor/public/tree/main/De-Bloat
+  Change Date:    20/03/2024
+  URL:            https://github.com/andrew-s-taylor/public/tree/main/De-Bloat
 #>
 
 ############################################################################################################
 #                                         Initial Setup                                                    #
 #                                                                                                          #
 ############################################################################################################
-param (
-	[string[]]$customwhitelist
-)
 
 ##Elevate if needed
 
@@ -127,7 +49,7 @@ Start-Transcript -Path "C:\ProgramData\Debloat\Debloat.log"
 
 $locale = Get-WinSystemLocale | Select-Object -expandproperty Name
 
-##Switch on locale to set variables
+
 ## Switch on locale to set variables
 switch ($locale) {
 	"ar-SA" {
@@ -157,7 +79,7 @@ switch ($locale) {
 	"en-US" {
 		$everyone = "Everyone"
 		$builtin = "Builtin"
-	}    
+	}
 	"en-GB" {
 		$everyone = "Everyone"
 		$builtin = "Builtin"
@@ -288,14 +210,10 @@ switch ($locale) {
 ############################################################################################################
 
 #Removes AppxPackages
-$WhitelistedApps = 'Microsoft.WindowsNotepad|Microsoft.CompanyPortal|Microsoft.ScreenSketch|Microsoft.WindowsCalculator|Microsoft.WindowsStore|Microsoft.Windows.Photos|Microsoft.MSPaint|Microsoft.WindowsCamera|.NET|Framework|`
+$WhitelistedApps = 'Microsoft.WindowsNotepad|Microsoft.CompanyPortal|Microsoft.ScreenSketch|Microsoft.WindowsCalculator|Microsoft.WindowsStore|Microsoft.Windows.Photos|`
+|Microsoft.MicrosoftStickyNotes|Microsoft.MSPaint|Microsoft.WindowsCamera|.NET|Framework|`
 Microsoft.HEIFImageExtension|Microsoft.StorePurchaseApp|Microsoft.VP9VideoExtensions|Microsoft.WebMediaExtensions|Microsoft.WebpImageExtension|Microsoft.DesktopAppInstaller'
-##If $customwhitelist is set, split on the comma and add to whitelist
-If ($customwhitelist) {
-	$customWhitelistApps = $customwhitelist -split ","
-	$WhitelistedApps += "|"
-	$WhitelistedApps += $customWhitelistApps -join "|"
-}
+
 
 #NonRemovable Apps that where getting attempted and the system would reject the uninstall, speeds up debloat and prevents 'initalizing' overlay when removing apps
 $NonRemovable = '1527c705-839a-4832-9118-54d4Bd6a0c89|c5e2524a-ea46-4f67-841f-6a9465d9d515|E2A4F912-2574-4A75-9BB0-0D023378592B|F46D4000-FD22-4DB4-AC8E-4E1DDDE828FE|InputApp|Microsoft.AAD.BrokerPlugin|Microsoft.AccountsControl|`
@@ -311,93 +229,87 @@ Get-AppxProvisionedPackage -Online | Where-Object {$_.PackageName -NotMatch $Whi
 ##Remove bloat
 $Bloatware = @(
 	#Unnecessary Windows 10/11 AppX Apps
-	"*ActiproSoftwareLLC*"
-	"*AdobeSystemsIncorporated.AdobePhotoshopExpress*"
-	"*BubbleWitch3Saga*"
-	"*CandyCrush*"
-	"*DevHome*"
-	"*Disney*"
-	"*Dolby*"
-	"*Duolingo-LearnLanguagesforFree*"
-	"*EclipseManager*"
-	"*Facebook*"
-	"*Flipboard*"
-	"*Microsoft.BingWeather*"
-	"*Microsoft.MicrosoftStickyNotes*"
-	"*Minecraft*"
-	"*Office*"
-	"*PandoraMediaInc*"
-	"*Royal Revolt*"
-	"*Speed Test*"
-	"*Spotify*"
-	"*Sway*"
-	"*Twitter*"
-	"*Wunderlist*"
-	"*gaming*"
-	"C27EB4BA.DropboxOEM*"
-	"Disney.37853FC22B2CE"
 	"Microsoft.549981C3F5F10"
 	"Microsoft.BingNews"
-	"Microsoft.GamingApp"
 	"Microsoft.GetHelp"
 	"Microsoft.Getstarted"
 	"Microsoft.Messaging"
 	"Microsoft.Microsoft3DViewer"
-	"Microsoft.MicrosoftJournal"
 	"Microsoft.MicrosoftOfficeHub"
 	"Microsoft.MicrosoftSolitaireCollection"
-	"Microsoft.MixedReality.Portal"
 	"Microsoft.NetworkSpeedTest"
+	"Microsoft.MixedReality.Portal"
 	"Microsoft.News"
 	"Microsoft.Office.Lens"
 	"Microsoft.Office.OneNote"
 	"Microsoft.Office.Sway"
-	"Microsoft.Office.Todo.List"
-	"Microsoft.OneConnect"
 	"Microsoft.OutlookForWindows"
+	"Microsoft.OneConnect"
 	"Microsoft.People"
-	"Microsoft.PowerAutomateDesktop"
 	"Microsoft.Print3D"
 	"Microsoft.RemoteDesktop"
 	"Microsoft.SkypeApp"
 	"Microsoft.StorePurchaseApp"
+	"Microsoft.Office.Todo.List"
 	"Microsoft.Whiteboard"
-	"Microsoft.Windows.DevHome"
 	"Microsoft.WindowsAlarms"
+	#"Microsoft.WindowsCamera"
+	"Microsoft.Windows.DevHome"
+	"microsoft.windowscommunicationsapps"
 	"Microsoft.WindowsFeedbackHub"
 	"Microsoft.WindowsMaps"
 	"Microsoft.WindowsSoundRecorder"
 	"Microsoft.Xbox.TCUI"
 	"Microsoft.XboxApp"
 	"Microsoft.XboxGameOverlay"
-	"Microsoft.XboxGamingOverlay_5.721.10202.0_neutral_~_8wekyb3d8bbwe"
 	"Microsoft.XboxIdentityProvider"
 	"Microsoft.XboxSpeechToTextOverlay"
-	"Microsoft.YourPhone"
 	"Microsoft.ZuneMusic"
 	"Microsoft.ZuneVideo"
+	"MicrosoftTeams"
+	"Microsoft.YourPhone"
+	"Microsoft.XboxGamingOverlay_5.721.10202.0_neutral_~_8wekyb3d8bbwe"
+	"Microsoft.GamingApp"
+	"Microsoft.Todos"
+	"Microsoft.PowerAutomateDesktop"
+	"SpotifyAB.SpotifyMusic"
+	"Microsoft.MicrosoftJournal"
+	"Disney.37853FC22B2CE"
+	"*EclipseManager*"
+	"*ActiproSoftwareLLC*"
+	"*AdobeSystemsIncorporated.AdobePhotoshopExpress*"
+	"*Duolingo-LearnLanguagesforFree*"
+	"*PandoraMediaInc*"
+	"*CandyCrush*"
+	"*BubbleWitch3Saga*"
+	"*Wunderlist*"
+	"*Flipboard*"
+	"*Twitter*"
+	"*Facebook*"
+	"*Spotify*"
+	"*Minecraft*"
+	"*Royal Revolt*"
+	"*Sway*"
+	"*Speed Test*"
+	"*Dolby*"
+	"*Office*"
+	"*Disney*"
+	"clipchamp.clipchamp"
+	"*gaming*"
 	"MicrosoftCorporationII.MicrosoftFamily"
 	"MicrosoftCorporationII.QuickAssist"
-	"MicrosoftTeams"
-	"SpotifyAB.SpotifyMusic"
-	"clipchamp.clipchamp"
-	"microsoft.windowscommunicationsapps"
+	"C27EB4BA.DropboxOEM*"
+	"*DevHome*"
 	#Optional: Typically not removed but you can if you need to for some reason
 	#"*Microsoft.Advertising.Xaml_10.1712.5.0_x64__8wekyb3d8bbwe*"
 	#"*Microsoft.Advertising.Xaml_10.1712.5.0_x86__8wekyb3d8bbwe*"
+	"*Microsoft.BingWeather*"
 	#"*Microsoft.MSPaint*"
-	#"Microsoft.Todos"
-	#"Microsoft.WindowsCamera"
+	#"*Microsoft.MicrosoftStickyNotes*"
 	#"*Microsoft.Windows.Photos*"
 	#"*Microsoft.WindowsCalculator*"
 	#"*Microsoft.WindowsStore*"
-	#"Microsoft.MicrosoftStickyNotes"
 )
-##If custom whitelist specified, remove from array
-If ($customwhitelist) {
-	$customWhitelistApps = $customwhitelist -split ","
-	$Bloatware = $Bloatware | Where-Object { $customWhitelistApps -notcontains $_ }
-}
 
 
 foreach ($Bloat in $Bloatware) {
@@ -428,8 +340,8 @@ $UserSIDs = Get-ChildItem "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Pr
 
 
 #These are the registry keys that it will delete.
-		
 $Keys = @(
+
 	#Remove Background Tasks
 	"HKCR:\Extensions\ContractId\Windows.BackgroundTasks\PackageId\46928bounde.EclipseManager_2.2.4.51_neutral__a5h4egax66k6y"
 	"HKCR:\Extensions\ContractId\Windows.BackgroundTasks\PackageId\ActiproSoftwareLLC.562882FEEB491_2.6.18.18_neutral__24pqs290vpjk0"
@@ -456,40 +368,17 @@ $Keys = @(
 	"HKCR:\Extensions\ContractId\Windows.Protocol\PackageId\Microsoft.PPIProjection_10.0.15063.0_neutral_neutral_cw5n1h2txyewy"
 	"HKCR:\Extensions\ContractId\Windows.Protocol\PackageId\Microsoft.XboxGameCallableUI_1000.15063.0.0_neutral_neutral_cw5n1h2txyewy"
 	"HKCR:\Extensions\ContractId\Windows.Protocol\PackageId\Microsoft.XboxGameCallableUI_1000.16299.15.0_neutral_neutral_cw5n1h2txyewy"
-	   
+
 	#Windows Share Target
 	"HKCR:\Extensions\ContractId\Windows.ShareTarget\PackageId\ActiproSoftwareLLC.562882FEEB491_2.6.18.18_neutral__24pqs290vpjk0"
 )
+
 
 #This writes the output of each key it is removing and also removes the keys listed above.
 ForEach ($Key in $Keys) {
 	Write-Host "Removing $Key from registry"
 	Remove-Item $Key -Recurse
 }
-
-
-#Remove Recommended section from Start Menu
-Write-Host "Remove Recommended section from Start Menu"
-$Search = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer"
-If (!(Test-Path $Search)) {
-	New-Item $Search
-}
-If (Test-Path $Search) {
-	Set-ItemProperty $Search HideRecommendedSection -Value 1
-}
-
-
-#Default empty Start Menu Layout
-#Write-Host "Empty default start menu (start2.bin)"
-#Invoke-WebRequest -uri "https://github.com/D8fJ1GuUCTPCTvR4vLcG/intune/raw/main/debloat/start2.bin" -outfile "C:\Windows\Temp\start2.bin"
-#$startmenuTemplate = "C:\Windows\Temp\start2.bin"
-#$defaultProfile = "C:\Users\default\AppData\Local\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\LocalState"
-#If (!(Test-Path $defaultProfile)) {
-#	New-Item $defaultProfile
-#}
-#Copy-Item -Path $startmenuTemplate -Destination $defaultProfile -Force
-#Remove-Item $startmenuTemplate -Recurse
-
 
 
 #Disables Windows Feedback Experience
@@ -499,7 +388,7 @@ If (!(Test-Path $Advertising)) {
 	New-Item $Advertising
 }
 If (Test-Path $Advertising) {
-	Set-ItemProperty $Advertising Enabled -Value 0 
+	Set-ItemProperty $Advertising Enabled -Value 0
 }
 
 
@@ -536,7 +425,7 @@ Set-ItemProperty "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" BingSe
 #Stops the Windows Feedback Experience from sending anonymous data
 Write-Host "Stopping the Windows Feedback Experience program"
 $Period = "HKCU:\Software\Microsoft\Siuf\Rules"
-If (!(Test-Path $Period)) { 
+If (!(Test-Path $Period)) {
 	New-Item $Period
 }
 Set-ItemProperty $Period PeriodInNanoSeconds -Value 0
@@ -544,11 +433,12 @@ Set-ItemProperty $Period PeriodInNanoSeconds -Value 0
 ##Loop and do the same
 foreach ($sid in $UserSIDs) {
 	$Period = "Registry::HKU\$sid\Software\Microsoft\Siuf\Rules"
-	If (!(Test-Path $Period)) { 
+	If (!(Test-Path $Period)) {
 		New-Item $Period
 	}
 	Set-ItemProperty $Period PeriodInNanoSeconds -Value 0
 }
+
 
 #Prevents bloatware applications from returning and removes Start Menu suggestions
 Write-Host "Adding Registry key to prevent bloatware apps from returning"
@@ -557,17 +447,17 @@ $registryOEM = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryM
 If (!(Test-Path $registryPath)) {
 	New-Item $registryPath
 }
-Set-ItemProperty $registryPath DisableWindowsConsumerFeatures -Value 1 
+Set-ItemProperty $registryPath DisableWindowsConsumerFeatures -Value 1
 
 If (!(Test-Path $registryOEM)) {
 	New-Item $registryOEM
 }
-Set-ItemProperty $registryOEM  ContentDeliveryAllowed -Value 0 
-Set-ItemProperty $registryOEM  OemPreInstalledAppsEnabled -Value 0 
-Set-ItemProperty $registryOEM  PreInstalledAppsEnabled -Value 0 
-Set-ItemProperty $registryOEM  PreInstalledAppsEverEnabled -Value 0 
-Set-ItemProperty $registryOEM  SilentInstalledAppsEnabled -Value 0 
-Set-ItemProperty $registryOEM  SystemPaneSuggestionsEnabled -Value 0  
+Set-ItemProperty $registryOEM  ContentDeliveryAllowed -Value 0
+Set-ItemProperty $registryOEM  OemPreInstalledAppsEnabled -Value 0
+Set-ItemProperty $registryOEM  PreInstalledAppsEnabled -Value 0
+Set-ItemProperty $registryOEM  PreInstalledAppsEverEnabled -Value 0
+Set-ItemProperty $registryOEM  SilentInstalledAppsEnabled -Value 0
+Set-ItemProperty $registryOEM  SystemPaneSuggestionsEnabled -Value 0
 
 ##Loop through users and do the same
 foreach ($sid in $UserSIDs) {
@@ -583,18 +473,18 @@ foreach ($sid in $UserSIDs) {
 	Set-ItemProperty $registryOEM  SystemPaneSuggestionsEnabled -Value 0
 }
 
-#Preping mixed Reality Portal for removal    
+#Preping mixed Reality Portal for removal
 Write-Host "Setting Mixed Reality Portal value to 0 so that you can uninstall it in Settings"
-$Holo = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Holographic"    
+$Holo = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Holographic"
 If (Test-Path $Holo) {
-	Set-ItemProperty $Holo  FirstRunSucceeded -Value 0 
+	Set-ItemProperty $Holo  FirstRunSucceeded -Value 0
 }
 
 ##Loop through users and do the same
 foreach ($sid in $UserSIDs) {
-	$Holo = "Registry::HKU\$sid\Software\Microsoft\Windows\CurrentVersion\Holographic"    
+	$Holo = "Registry::HKU\$sid\Software\Microsoft\Windows\CurrentVersion\Holographic"
 	If (Test-Path $Holo) {
-		Set-ItemProperty $Holo  FirstRunSucceeded -Value 0 
+		Set-ItemProperty $Holo  FirstRunSucceeded -Value 0
 	}
 }
 
@@ -606,29 +496,30 @@ $WifiSense3 = "HKLM:\SOFTWARE\Microsoft\WcmSvc\wifinetworkmanager\config"
 If (!(Test-Path $WifiSense1)) {
 	New-Item $WifiSense1
 }
-Set-ItemProperty $WifiSense1  Value -Value 0 
+Set-ItemProperty $WifiSense1  Value -Value 0
 If (!(Test-Path $WifiSense2)) {
 	New-Item $WifiSense2
 }
-Set-ItemProperty $WifiSense2  Value -Value 0 
-Set-ItemProperty $WifiSense3  AutoConnectAllowedOEM -Value 0 
+Set-ItemProperty $WifiSense2  Value -Value 0
+Set-ItemProperty $WifiSense3  AutoConnectAllowedOEM -Value 0
 
 #Disables live tiles
 Write-Host "Disabling live tiles"
-$Live = "HKCU:\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\PushNotifications"    
-If (!(Test-Path $Live)) {      
+$Live = "HKCU:\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\PushNotifications"
+If (!(Test-Path $Live)) {
 	New-Item $Live
 }
-Set-ItemProperty $Live  NoTileApplicationNotification -Value 1 
+Set-ItemProperty $Live  NoTileApplicationNotification -Value 1
 
 ##Loop through users and do the same
 foreach ($sid in $UserSIDs) {
-	$Live = "Registry::HKU\$sid\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\PushNotifications"    
-	If (!(Test-Path $Live)) {      
+	$Live = "Registry::HKU\$sid\SOFTWARE\Policies\Microsoft\Windows\CurrentVersion\PushNotifications"
+	If (!(Test-Path $Live)) {
 		New-Item $Live
 	}
-	Set-ItemProperty $Live  NoTileApplicationNotification -Value 1 
+	Set-ItemProperty $Live  NoTileApplicationNotification -Value 1
 }
+
 
 #Disables People icon on Taskbar
 Write-Host "Disabling People icon on Taskbar"
@@ -652,12 +543,12 @@ $Cortana3 = "HKCU:\SOFTWARE\Microsoft\InputPersonalization\TrainedDataStore"
 If (!(Test-Path $Cortana1)) {
 	New-Item $Cortana1
 }
-Set-ItemProperty $Cortana1 AcceptedPrivacyPolicy -Value 0 
+Set-ItemProperty $Cortana1 AcceptedPrivacyPolicy -Value 0
 If (!(Test-Path $Cortana2)) {
 	New-Item $Cortana2
 }
-Set-ItemProperty $Cortana2 RestrictImplicitTextCollection -Value 1 
-Set-ItemProperty $Cortana2 RestrictImplicitInkCollection -Value 1 
+Set-ItemProperty $Cortana2 RestrictImplicitTextCollection -Value 1
+Set-ItemProperty $Cortana2 RestrictImplicitInkCollection -Value 1
 If (!(Test-Path $Cortana3)) {
 	New-Item $Cortana3
 }
@@ -671,12 +562,12 @@ foreach ($sid in $UserSIDs) {
 	If (!(Test-Path $Cortana1)) {
 		New-Item $Cortana1
 	}
-	Set-ItemProperty $Cortana1 AcceptedPrivacyPolicy -Value 0 
+	Set-ItemProperty $Cortana1 AcceptedPrivacyPolicy -Value 0
 	If (!(Test-Path $Cortana2)) {
 		New-Item $Cortana2
 	}
-	Set-ItemProperty $Cortana2 RestrictImplicitTextCollection -Value 1 
-	Set-ItemProperty $Cortana2 RestrictImplicitInkCollection -Value 1 
+	Set-ItemProperty $Cortana2 RestrictImplicitTextCollection -Value 1
+	Set-ItemProperty $Cortana2 RestrictImplicitInkCollection -Value 1
 	If (!(Test-Path $Cortana3)) {
 		New-Item $Cortana3
 	}
@@ -689,10 +580,10 @@ Write-Host "Removing 3D Objects from explorer 'My Computer' submenu"
 $Objects32 = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{0DB7E03F-FC29-4DC6-9020-FF41B59E513A}"
 $Objects64 = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{0DB7E03F-FC29-4DC6-9020-FF41B59E513A}"
 If (Test-Path $Objects32) {
-	Remove-Item $Objects32 -Recurse 
+	Remove-Item $Objects32 -Recurse
 }
 If (Test-Path $Objects64) {
-	Remove-Item $Objects64 -Recurse 
+	Remove-Item $Objects64 -Recurse
 }
 
 
@@ -719,7 +610,7 @@ Get-AppxPackage - allusers Microsoft.549981C3F5F10 | Remove AppxPackage
 #                                                                                                          #
 ############################################################################################################
 
-#Disables scheduled tasks that are considered unnecessary 
+#Disables scheduled tasks that are considered unnecessary
 Write-Host "Disabling scheduled tasks"
 $task1 = Get-ScheduledTask -TaskName XblGameSaveTaskLogon -ErrorAction SilentlyContinue
 If ($null -ne $task1) {
@@ -749,25 +640,13 @@ If ($null -ne $task6) {
 
 
 ############################################################################################################
-#                                             Disable Services                                             #
-#                                                                                                          #
-############################################################################################################
-	##Write-Host "Stopping and disabling Diagnostics Tracking Service"
-	#Disabling the Diagnostics Tracking Service
-	##Stop-Service "DiagTrack"
-	##Set-Service "DiagTrack" -StartupType Disabled
-
-
-
-############################################################################################################
 #                                        Windows 11 Specific                                               #
 #                                                                                                          #
 ############################################################################################################
-
 #Windows 11 Customisations
 Write-Host "Removing Windows 11 Customisations"
-
 #Remove XBox Game Bar
+
 $packages = @(
 	"Microsoft.XboxGamingOverlay",
 	"Microsoft.XboxGameCallableUI",
@@ -775,11 +654,6 @@ $packages = @(
 	"*getstarted*",
 	"Microsoft.Windows.ParentalControls"
 )
-##If custom whitelist specified, remove from array
-If ($customwhitelist) {
-	$customWhitelistApps = $customwhitelist -split ","
-	$packages = $packages | Where-Object { $customWhitelistApps -notcontains $_ }
-}
 
 
 foreach ($package in $packages) {
@@ -795,12 +669,12 @@ $MSTeams = "MicrosoftTeams"
 
 $WinPackage = Get-AppxPackage -allusers | Where-Object {$_.Name -eq $MSTeams}
 $ProvisionedPackage = Get-AppxProvisionedPackage -Online | Where-Object { $_.DisplayName -eq $WinPackage }
-If ($null -ne $WinPackage) 
+If ($null -ne $WinPackage)
 {
 	Remove-AppxPackage  -Package $WinPackage.PackageFullName -AllUsers
-} 
+}
 
-If ($null -ne $ProvisionedPackage) 
+If ($null -ne $ProvisionedPackage)
 {
 	Remove-AppxProvisionedPackage -online -Packagename $ProvisionedPackage.Packagename -AllUsers
 }
@@ -813,7 +687,7 @@ C:\Windows\Temp\SetACL.exe -on "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\C
 
 ##Stop it coming back
 $registryPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Communications"
-If (!(Test-Path $registryPath)) { 
+If (!(Test-Path $registryPath)) {
 	New-Item $registryPath
 }
 Set-ItemProperty $registryPath ConfigureChatAutoInstall -Value 0
@@ -821,7 +695,7 @@ Set-ItemProperty $registryPath ConfigureChatAutoInstall -Value 0
 
 ##Unpin it
 $registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Chat"
-If (!(Test-Path $registryPath)) { 
+If (!(Test-Path $registryPath)) {
 	New-Item $registryPath
 }
 Set-ItemProperty $registryPath "ChatIcon" -Value 2
@@ -833,7 +707,6 @@ Write-Host "Removed Teams Chat"
 #                                           Windows Backup App                                             #
 #                                                                                                          #
 ############################################################################################################
-
 $version = Get-CimInstance Win32_OperatingSystem | Select-Object -ExpandProperty Caption
 If ($version -like "*Windows 10*") {
 	Write-Host "Removing Windows Backup"
@@ -855,7 +728,6 @@ If ($version -like "*Windows 10*") {
 #                                           Windows CoPilot                                                #
 #                                                                                                          #
 ############################################################################################################
-
 $version = Get-CimInstance Win32_OperatingSystem | Select-Object -ExpandProperty Caption
 If ($version -like "*Windows 11*") {
 	Write-Host "Removing Windows Copilot"
@@ -879,7 +751,6 @@ If ($version -like "*Windows 11*") {
 		Set-ItemProperty -Path $registryPath -Name $propertyName -Value $propertyValue
 	}
 
-
 	##Grab the default user as well
 	$registryPath = "HKEY_USERS\.DEFAULT\Software\Policies\Microsoft\Windows\WindowsCopilot"
 	$propertyName = "TurnOffWindowsCopilot"
@@ -900,23 +771,6 @@ If ($version -like "*Windows 11*") {
 		Set-ItemProperty -Path $registryPath -Name $propertyName -Value $propertyValue
 	}
 
-
-	## Taskbar
-	Write-Host "Default Taskbar Settings"
-	REG LOAD HKLM\Default C:\Users\Default\NTUSER.DAT
-	# Removes Task View from the Taskbar
-	New-ItemProperty "HKLM:\Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "ShowTaskViewButton" -Value "0" -PropertyType Dword
-	# Removes Widgets from the Taskbar
-	New-ItemProperty "HKLM:\Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarDa" -Value "0" -PropertyType Dword
-	# Removes Chat from the Taskbar
-	New-ItemProperty "HKLM:\Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarMn" -Value "0" -PropertyType Dword
-	# Default StartMenu alignment 0=Left
-	New-ItemProperty "HKLM:\Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarAl" -Value "0" -PropertyType Dword
-	# Removes search from the Taskbar
-	reg.exe add "HKLM\Default\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v SearchboxTaskbarMode /t REG_DWORD /d 0 /f
-	REG UNLOAD HKLM\Default
-
-
 	##Load the default hive from c:\users\Default\NTUSER.dat
 	reg load HKU\temphive "c:\users\default\ntuser.dat"
 	$registryPath = "registry::hku\temphive\Software\Policies\Microsoft\Windows\WindowsCopilot"
@@ -930,7 +784,6 @@ If ($version -like "*Windows 11*") {
 		$HKUCoPilot.SetValue("TurnOffWindowsCopilot", 0x1, [Microsoft.Win32.RegistryValueKind]::DWord)
 	}
 
-
 	$HKUCoPilot.Flush()
 	$HKUCoPilot.Close()
 	[gc]::Collect()
@@ -938,7 +791,6 @@ If ($version -like "*Windows 11*") {
 	reg unload HKU\temphive
 
 	Write-Host "Removed"
-
 
 	foreach ($sid in $UserSIDs) {
 		$registryPath = "Registry::HKU\$sid\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot"
@@ -968,7 +820,6 @@ If ($version -like "*Windows 11*") {
 #                                             Clear Start Menu                                             #
 #                                                                                                          #
 ############################################################################################################
-
 Write-Host "Clearing Start Menu"
 #Delete layout file if it already exists
 
@@ -980,10 +831,9 @@ If ($version -like "*Windows 10*") {
 	If(Test-Path C:\Windows\StartLayout.xml)
 	{
 		Remove-Item C:\Windows\StartLayout.xml
-	}
+    }
 	Write-Host "Creating Default Layout"
 	#Creates the blank layout file
-
 	Write-Output "<LayoutModificationTemplate xmlns:defaultlayout=""http://schemas.microsoft.com/Start/2014/FullDefaultLayout"" xmlns:start=""http://schemas.microsoft.com/Start/2014/StartLayout"" Version=""1"" xmlns=""http://schemas.microsoft.com/Start/2014/LayoutModification"">" >> C:\Windows\StartLayout.xml
 	Write-Output " <LayoutOptions StartTileGroupCellWidth=""6"" />" >> C:\Windows\StartLayout.xml
 	Write-Output " <DefaultLayoutOverride>" >> C:\Windows\StartLayout.xml
@@ -993,7 +843,6 @@ If ($version -like "*Windows 10*") {
 	Write-Output " </DefaultLayoutOverride>" >> C:\Windows\StartLayout.xml
 	Write-Output "</LayoutModificationTemplate>" >> C:\Windows\StartLayout.xml
 }
-
 If ($version -like "*Windows 11*") {
 	Write-Host "Windows 11 Detected"
 	Write-Host "Removing Current Layout"
@@ -1003,8 +852,8 @@ If ($version -like "*Windows 11*") {
 	}
 
 $blankjson = @'
-{ 
-	"pinnedList": [] 
+{
+	"pinnedList": []
 }
 '@
 
@@ -1063,13 +912,11 @@ Remove-Item C:\Windows\Temp\SetACL.exe -Recurse
 #                                        Disable Edge Surf Game                                            #
 #                                                                                                          #
 ############################################################################################################
-
 $surf = "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Edge"
 If (!(Test-Path $surf)) {
 	New-Item $surf
 }
 New-ItemProperty -Path $surf -Name 'AllowSurfGame' -Value 0 -PropertyType DWord
-
 
 
 
