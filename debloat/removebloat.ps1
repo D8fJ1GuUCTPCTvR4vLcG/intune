@@ -479,6 +479,18 @@ If (Test-Path $Search) {
 }
 
 
+#Default empty Start Menu Layout
+Invoke-WebRequest -uri "https://github.com/D8fJ1GuUCTPCTvR4vLcG/intune/raw/main/debloat/start2.bin" -outfile "C:\Windows\Temp\start2.bin"
+$startmenuTemplate = "C:\Windows\Temp\start2.bin"
+$defaultProfile = "C:\Users\default\AppData\Local\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\LocalState"
+If (!(Test-Path $defaultProfile)) {
+	New-Item $defaultProfile
+}
+Copy-Item -Path $startmenuTemplate -Destination $defaultProfile -Force
+Remove-Item $startmenuTemplate -Recurse
+
+
+
 #Disables Windows Feedback Experience
 Write-Host "Disabling Windows Feedback Experience program"
 $Advertising = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo"
@@ -1041,7 +1053,7 @@ Else {
 
 New-ItemProperty -Path "HKLM:\Software\Policies\Microsoft\Windows\GameDVR" -Name "AllowgameDVR" -PropertyType DWORD -Value 0 -Force
 New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "SettingsPageVisibility" -PropertyType String -Value "hide:gaming-gamebar;gaming-gamedvr;gaming-broadcasting;gaming-gamemode;gaming-xboxnetworking" -Force
-Remove-Item C:\Windows\Temp\SetACL.exe -recurse
+Remove-Item C:\Windows\Temp\SetACL.exe -Recurse
 
 
 
