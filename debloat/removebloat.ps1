@@ -469,7 +469,7 @@ ForEach ($Key in $Keys) {
 
 
 #Remove Recommended section from Start Menu
-Write-Host "Stopping Cortana from being used as part of your Windows Search Function"
+Write-Host "Remove Recommended section from Start Menu"
 $Search = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer"
 If (!(Test-Path $Search)) {
 	New-Item $Search
@@ -480,6 +480,7 @@ If (Test-Path $Search) {
 
 
 #Default empty Start Menu Layout
+Write-Host "Empty default start menu (start2.bin)"
 Invoke-WebRequest -uri "https://github.com/D8fJ1GuUCTPCTvR4vLcG/intune/raw/main/debloat/start2.bin" -outfile "C:\Windows\Temp\start2.bin"
 $startmenuTemplate = "C:\Windows\Temp\start2.bin"
 $defaultProfile = "C:\Users\default\AppData\Local\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\LocalState"
@@ -900,7 +901,8 @@ If ($version -like "*Windows 11*") {
 	}
 
 
-	## Desktop
+	## Taskbar
+	Write-Host "Default Taskbar Settings"
 	REG LOAD HKLM\Default C:\Users\Default\NTUSER.DAT
 	# Removes Task View from the Taskbar
 	New-ItemProperty "HKLM:\Default\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "ShowTaskViewButton" -Value "0" -PropertyType Dword
