@@ -19,4 +19,4 @@ Invoke-WebRequest `
 -UseBasicParsing `
 -Headers @{"Cache-Control"="no-cache"}
 
-Invoke-Expression -Command "$templateFilePath"
+Invoke-Expression -Command $templateFilePath
