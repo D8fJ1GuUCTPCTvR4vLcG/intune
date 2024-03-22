@@ -1,5 +1,6 @@
 # https://github.com/andrew-s-taylor/public/tree/main/De-Bloat
 
+
 $DebloatFolder = "C:\ProgramData\Debloat"
 If (Test-Path $DebloatFolder) {
 	Write-Output "$DebloatFolder exists. Skipping."
@@ -19,4 +20,9 @@ Invoke-WebRequest `
 -UseBasicParsing `
 -Headers @{"Cache-Control"="no-cache"}
 
-Invoke-Expression -Command $templateFilePath
+
+##Populate between the speechmarks any apps you want to whitelist, comma-separated
+$arguments = ' -customwhitelist ""'
+
+
+Invoke-Expression -Command "$templateFilePath $arguments"
